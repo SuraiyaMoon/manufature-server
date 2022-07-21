@@ -17,6 +17,7 @@ async function run() {
     try {
         await client.connect();
         const toolCollection = client.db("tool_manufacture").collection("tools");
+        const orderCollection = client.db("tool_manufacture").collection("orders");
         console.log('mongo connected')
 
 
@@ -27,6 +28,22 @@ async function run() {
             const cursor = toolCollection.find(query);
             const tools = await cursor.toArray();
             res.send(tools)
+        })
+
+        //get tools by id
+        app.get('/tools/:id', async (req, res) => {
+
+            const id = req.params.id;
+            const query = { _id: id };
+            const tools = await toolCollection.findOne(query)
+            res.send(tools)
+        })
+
+        //post order collection 
+        app.post('/order', async (req, res) => {
+            const order = req.body;
+            const orderResult = await orderCollection.insertOne(order)
+            res.send(orderResult)
         })
 
     }
