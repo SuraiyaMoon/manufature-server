@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors")
-// const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 require('dotenv').config();
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -13,11 +13,37 @@ app.use(express.json());
 //mongodb
 const uri = `mongodb+srv://${process.env.SECRET_USER}:${process.env.SECRET_PASS}@cluster0.higv1.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+//jwt
+
+async function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send({
+            message: 'Unauthorized Access'
+        })
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({
+                message: 'Forbidden access'
+            })
+        }
+        req.decoded = decoded;
+        next()
+
+    })
+
+
+
+}
+
 async function run() {
     try {
         await client.connect();
         const toolCollection = client.db("tool_manufacture").collection("tools");
         const orderCollection = client.db("tool_manufacture").collection("orders");
+        const userCollection = client.db("tool_manufacture").collection("users")
         console.log('mongo connected')
 
 
@@ -45,6 +71,35 @@ async function run() {
             const orderResult = await orderCollection.insertOne(order)
             res.send(orderResult)
         })
+
+        //get order by email
+        app.get('/order', verifyJWT, async (req, res) => {
+
+            const email = req.query.email;
+            const query = { email: email };
+            const cursor = orderCollection.find(query);
+            const orders = await cursor.toArray();
+            res.send(orders)
+
+        })
+
+
+
+        //user updated or insert api
+        app.put('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email }
+            const option = { upsert: true };
+            const updateDoc = {
+                $set: user,
+            };
+
+            const result = await userCollection.updateOne(filter, updateDoc, option);
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, { expiresIn: '3h' })
+            res.send({ result, token })
+
+        });
 
     }
     finally {
