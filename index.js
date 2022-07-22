@@ -43,8 +43,9 @@ async function run() {
         await client.connect();
         const toolCollection = client.db("tool_manufacture").collection("tools");
         const orderCollection = client.db("tool_manufacture").collection("orders");
+        const reviewCollection = client.db("tool_manufacture").collection("review");
         const userCollection = client.db("tool_manufacture").collection("users")
-        console.log('mongo connected')
+
 
 
 
@@ -91,6 +92,14 @@ async function run() {
 
 
         });
+
+        //add review api
+
+        app.post('/review', async (req, res) => {
+            const review = req.body;
+            const orderResult = await reviewCollection.insertOne(review)
+            res.send(orderResult)
+        })
 
         //get all users
         app.get('/user', verifyJWT, async (req, res) => {
