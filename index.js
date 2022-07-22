@@ -102,13 +102,18 @@ async function run() {
         })
 
 
-
-
         //add review api
         app.post('/review', verifyJWT, async (req, res) => {
             const review = req.body;
             const reviewResult = await reviewCollection.insertOne(review)
             res.send(reviewResult)
+        })
+
+        //add product api for admin
+        app.post('/tool', verifyJWT, async (req, res) => {
+            const product = req.body;
+            const tools = await toolCollection.insertOne(product)
+            res.send(tools)
         })
 
         //get all users
@@ -119,8 +124,6 @@ async function run() {
             res.send(users)
 
         })
-
-
 
         //user updated or insert api
         app.put('/user/:email', async (req, res) => {
