@@ -102,7 +102,9 @@ async function run() {
             const updateDoc = {
                 $set: {
                     paid: true,
-                    transactionId: paymentInfo.transactionId
+                    transactionId: paymentInfo.transactionId,
+                    status: 'pending'
+
                 }
 
             }
