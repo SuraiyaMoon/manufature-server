@@ -7,6 +7,7 @@ require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 app.use(cors());
 app.use(express.json());
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 
 
@@ -45,6 +46,23 @@ async function run() {
         const orderCollection = client.db("tool_manufacture").collection("orders");
         const reviewCollection = client.db("tool_manufacture").collection("review");
         const userCollection = client.db("tool_manufacture").collection("users")
+
+
+
+        app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+            const order = req.body;
+            const price = order.price;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            })
+
+        })
 
 
 
