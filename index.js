@@ -44,11 +44,12 @@ async function run() {
         await client.connect();
         const toolCollection = client.db("tool_manufacture").collection("tools");
         const orderCollection = client.db("tool_manufacture").collection("orders");
+        const paymentCollection = client.db("tool_manufacture").collection("payment");
         const reviewCollection = client.db("tool_manufacture").collection("review");
         const userCollection = client.db("tool_manufacture").collection("users")
 
 
-
+        //stripe order api
         app.post('/create-payment-intent', verifyJWT, async (req, res) => {
             const order = req.body;
             const price = order.price;
@@ -90,6 +91,27 @@ async function run() {
             const order = req.body;
             const orderResult = await orderCollection.insertOne(order)
             res.send(orderResult)
+        })
+
+        //
+        app.patch('/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const paymentInfo = req.body;
+            const query = { _id: ObjectId(id) };
+
+            const updateDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: paymentInfo.transactionId
+                }
+
+            }
+
+            const updateOrder = await orderCollection.updateOne(query, updateDoc);
+            const result = await paymentCollection.insertOne(paymentInfo)
+
+            res.send(updateDoc)
+
         })
 
         //get order by email
