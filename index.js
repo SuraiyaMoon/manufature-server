@@ -75,7 +75,7 @@ async function run() {
         })
 
         //get order by email
-        app.get('/order', verifyJWT, async (req, res) => {
+        app.get('/orderByEmail', verifyJWT, async (req, res) => {
 
             const email = req.query.email;
             const decodedEmail = req.decoded.email;
@@ -93,6 +93,15 @@ async function run() {
 
 
         });
+
+        //get order by id
+        app.get('/order/:id', verifyJWT, async (req, res) => {
+
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const order = await orderCollection.findOne(query)
+            res.send(order)
+        })
 
 
 
@@ -121,7 +130,7 @@ async function run() {
         //get all order api for admin
         app.get('/order', verifyJWT, async (req, res) => {
             const query = {};
-            const cursor = orderCollection.find(query);
+            const cursor = await orderCollection.find(query);
             const orders = await cursor.toArray();
             res.send(orders)
         })
