@@ -93,12 +93,22 @@ async function run() {
 
         });
 
-        //add review api
+        //get all reviews
+        app.get('/review', async (req, res) => {
+            const query = {};
+            const cursor = reviewCollection.find(query);
+            const reviewResult = await cursor.toArray();
+            res.send(reviewResult)
+        })
 
-        app.post('/review', async (req, res) => {
+
+
+
+        //add review api
+        app.post('/review', verifyJWT, async (req, res) => {
             const review = req.body;
-            const orderResult = await reviewCollection.insertOne(review)
-            res.send(orderResult)
+            const reviewResult = await reviewCollection.insertOne(review)
+            res.send(reviewResult)
         })
 
         //get all users
