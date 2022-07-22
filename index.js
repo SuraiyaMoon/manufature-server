@@ -103,7 +103,7 @@ async function run() {
                 $set: {
                     paid: true,
                     transactionId: paymentInfo.transactionId,
-                    status: pending
+                    status: "pending"
 
                 }
 
