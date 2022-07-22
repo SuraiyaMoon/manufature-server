@@ -49,6 +49,7 @@ async function run() {
 
 
 
+
         //get all tools
         app.get('/tools', async (req, res) => {
             const query = {};
@@ -116,6 +117,13 @@ async function run() {
             const product = req.body;
             const tools = await toolCollection.insertOne(product)
             res.send(tools)
+        })
+        //get all order api for admin
+        app.get('/order', verifyJWT, async (req, res) => {
+            const query = {};
+            const cursor = orderCollection.find(query);
+            const orders = await cursor.toArray();
+            res.send(orders)
         })
 
         //get all users
