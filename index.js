@@ -231,10 +231,22 @@ async function run() {
 
         });
 
+        //delete order api for normal user
+
+        app.delete('/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await orderCollection.deleteOne(query);
+            res.send(result)
+
+
+        });
+
         //delete product
         app.delete('/tools/:id', async (req, res) => {
+            const email = req.query.email;
             const id = req.params.id;
-            const query = { _id: ObjectId(id) }
+            const query = { _id: ObjectId(id), email }
             const result = await toolCollection.deleteOne(query);
             res.send(result)
         })
